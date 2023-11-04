@@ -39,11 +39,10 @@ pygame.mouse.set_visible(0)
 pygame.display.set_caption('Little Game')
 
 vel = 2 #velocity
-gravity = -1 #gravity strength
+gravity = -10 #gravity strength
 
 Postie = Player("sprite1.png", 50, y-100, vel, backGroundSize, floortiles)
 allSprites.add(Postie)
-print(backGroundSize)
 
 run = True
 while run:
@@ -55,9 +54,7 @@ while run:
             run = False
 
     Postie.handleInput()  
-    floorCollision = pygame.sprite.spritecollide(Postie, floortiles, False)
-    if not floorCollision:
-        Postie.rect.y -= gravity 
+    Postie.Gravity(gravity)
     Postie.Show(screen)
 
     pygame.display.update()

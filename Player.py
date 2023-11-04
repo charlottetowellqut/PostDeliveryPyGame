@@ -1,5 +1,6 @@
 import pygame
 import os
+from CollisionMask import CollisionMask
 
 # Player Class
 class Player(pygame.sprite.Sprite): 
@@ -14,18 +15,16 @@ class Player(pygame.sprite.Sprite):
         self.vel = vel #velocity
         self.floortiles = floortiles
         
-        self.create_bottom_mask()
+        
+        self.bottom_collision_mask = CollisionMask(self)
 
         
     def Show(self, surface):
         surface.blit(self.image, (self.rect.x, self.rect.y))
         
-    def create_bottom_mask(self):
-        # Get the bottom row of pixels from the sprite's rect
-        bottom_row = self.image.subsurface(pygame.Rect(0, self.rect.height - 1, self.rect.width, 1))
-        bottom_mask = pygame.mask.from_surface(bottom_row)
-
-        self.bottom_collision_mask = bottom_mask
+        
+    def update_bottom_mask(self):
+        self.bottom_collision_mask.move(self.rect.x, self.rect.y + self.rect.height - 1)
         
         
     def handleInput(self):
@@ -35,19 +34,16 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_RIGHT]:
             self.walkHorizontal(self.vel)
         if keys[pygame.K_UP]:
-            self.walkVertical(-1*self.vel)
+            print("walk vertical")
+            self.walkVertical(100)
         #if keys[pygame.K_DOWN]:
         #    self.walkVertical(self.vel)
-            
-            #to-do next
-            # set a floor
-            # set gravity
-            # set jumping
             
     def walkHorizontal(self, vel):
         newX = self.rect.x + vel
         if not (newX < 0 or newX > (self.backGroundSize[0] - self.rect.width)): #cant walk off edge
             self.rect.x += vel
+            self.update_bottom_mask()
             if vel > 0:
                 #walk right animation
                 pass
@@ -57,9 +53,12 @@ class Player(pygame.sprite.Sprite):
             #set sprite back to looking straight
     
     def walkVertical(self, vel):
-        #if vel > 0:
-        #    bottomPlatformCollision = pygame.sprite.spritecollide(self.bottom_collision_mask, self.floortiles, False)
-        #    if bottomPlatformCollision and vel > 0:
-        #        vel = 0
-        self.rect.y += vel
-        self.create_bottom_mask()
+        bottomPlatformCollision = len(pygame.sprite.spritecollide(self.bottom_collision_mask, self.floortiles, False)) > 0
+        print(f"bottom platform collision: {bottomPlatformCollision}")
+        
+        if (bottomPlatformCollision and vel > 0) or (not bottomPlatformCollision and vel < 0):
+            self.rect.y -= vel
+            self.update_bottom_mask()
+            
+    def Gravity(self, gravity):
+        self.walkVertical(gravity)
