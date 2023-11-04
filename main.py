@@ -39,7 +39,7 @@ pygame.mouse.set_visible(0)
 pygame.display.set_caption('Little Game')
 
 vel = 2 #velocity
-gravity = -10 #gravity strength
+gravity = -4.8 #gravity strength
 
 Postie = Player("sprite1.png", 50, y-100, vel, backGroundSize, floortiles)
 allSprites.add(Postie)
@@ -53,7 +53,7 @@ while run:
         if event.type == pygame.QUIT:
             run = False
 
-    Postie.handleInput()  
+    Postie.move()  
     Postie.Gravity(gravity)
     Postie.Show(screen)
 

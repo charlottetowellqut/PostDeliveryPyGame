@@ -16,18 +16,24 @@ class Player(pygame.sprite.Sprite):
         self.floortiles = floortiles
         
         
-        self.bottom_collision_mask = CollisionMask(self)
+        self.bottom_collision_mask = CollisionMask(self, "bottom")
+        self.top_collision_mask = CollisionMask(self, "top")
+        self.left_collision_mask = CollisionMask(self, "left")
+        self.right_collision_mask = CollisionMask(self, "right")
 
         
     def Show(self, surface):
         surface.blit(self.image, (self.rect.x, self.rect.y))
         
         
-    def update_bottom_mask(self):
-        self.bottom_collision_mask.move(self.rect.x, self.rect.y + self.rect.height - 1)
+    def update_collision_masks(self):
+        self.bottom_collision_mask.update(self)
+        self.top_collision_mask.update(self)
+        self.left_collision_mask.update(self)
+        self.right_collision_mask.update(self)
         
         
-    def handleInput(self):
+    def move(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             self.walkHorizontal(-1*self.vel)
@@ -38,27 +44,25 @@ class Player(pygame.sprite.Sprite):
             self.walkVertical(100)
         #if keys[pygame.K_DOWN]:
         #    self.walkVertical(self.vel)
+        self.update_collision_masks()
             
     def walkHorizontal(self, vel):
         newX = self.rect.x + vel
         if not (newX < 0 or newX > (self.backGroundSize[0] - self.rect.width)): #cant walk off edge
             self.rect.x += vel
-            self.update_bottom_mask()
-            if vel > 0:
-                #walk right animation
+            if vel > 0: #walk right
                 pass
-            else:
+            else: walk left
                 #walk left animation
                 pass
             #set sprite back to looking straight
     
     def walkVertical(self, vel):
-        bottomPlatformCollision = len(pygame.sprite.spritecollide(self.bottom_collision_mask, self.floortiles, False)) > 0
-        print(f"bottom platform collision: {bottomPlatformCollision}")
-        
+        #check bottom collision
+        bottomPlatformCollision = len(pygame.sprite.spritecollide(self.bottom_collision_mask, self.floortiles, False)) > 0        
+        #move if valid
         if (bottomPlatformCollision and vel > 0) or (not bottomPlatformCollision and vel < 0):
             self.rect.y -= vel
-            self.update_bottom_mask()
             
     def Gravity(self, gravity):
         self.walkVertical(gravity)
